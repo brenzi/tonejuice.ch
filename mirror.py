@@ -106,6 +106,14 @@ while queue:
                 continue
             if is_internal(full) and not is_skipped(full):
                 queue.append(full)
+    elif "css" in ctype:
+        for m in re.finditer(rb"url\(['\"]?([^)'\"]+)['\"]?\)", body):
+            ref = m.group(1).decode("utf-8", "replace")
+            if is_bad(ref) or ref.startswith(("data:", "//")):
+                continue
+            full = urljoin(final, ref).split("#", 1)[0]
+            if full not in seen and is_internal(full) and not is_skipped(full):
+                queue.append(full)
     if len(seen) % 50 == 0:
         print(f"{len(seen)} fetched, queue={len(queue)}", flush=True)
 
